@@ -1,0 +1,92 @@
+[general]
+# define common settings here
+resolution = "1024,1024"
+network_dim = 16
+network_alpha = 16                                              
+# Specify the alpha value used to prevent underflow and stabilize training. The default value is 1. If the same value is specified as network_dim, the same behavior as previous versions will be obtained
+# 1~16: LoRA has a smaller impact on the final generated image and is more delicate and stable
+# 16~32: LoRA moderately affects images while maintaining quality
+# 128 or more: LoRA has a significant impact and can easily lead to overfitting or distortion
+# default: network_alpha = rank or network_alpha = rank / 2
+
+network_train_unet_only = true          
+cache_latents = true                                            # is set 'true' data augmentations will disabled, cache vae output
+cache_latents_to_disk = true
+alpha_mask = false                                              # using a channel of rgba as mask,  set 'true' will ignore white/back background info
+
+[save]
+output_dir = "/mnt/ssd_1T/model/loras/PNBPT_Flux_epoch_600_bs_6_lr_1e-3"
+output_name = "PNBPT"
+logging_dir = "/mnt/ssd_1T/model/loras/PNBPT_Flux_epoch_600_bs_6_lr_1e-3"
+log_with = "tensorboard"
+log_prefix = "PNBPT-"
+save_model_as = "safetensors"
+save_precision = "bf16"
+# save_every_n_epochs = 5
+save_n_epoch_ratio = 10
+# save_state = true
+# save_state_on_train_end = true
+log_config = true
+
+[sample]
+sample_at_first = true
+sample_every_n_epochs = 50
+sample_sampler = "euler_a"
+sample_prompts = "/mnt/ssd_1T/data/SDData/caption_prompts.txt"
+
+[resource]
+# mem_eff_attn = true                                           # save vram
+xformers = true
+gradient_checkpointing = true                                  # save vram, but train time will increase
+highvram = true
+# lowram = false
+
+[optimizer]
+optimizer_type = "adamw8bit"
+max_grad_norm = 1.0
+lr_scheduler = "cosine"
+lr_warmup_steps = 100
+lr_scheduler_num_cycles = 1
+min_snr_gamma = 5                                               # https://github.com/kohya-ss/sd-scripts/pull/308
+prior_loss_weight = 1                                           # the weight of regularization image loss
+
+[model]
+pretrained_model_name_or_path = "/mnt/ssd_1T/code/ComfyUI/models/diffusion_models/FLUX1/flux1-dev.safetensors"
+clip_l = "/mnt/ssd_1T/code/ComfyUI/models/text_encoders/clip_l.safetensors"
+t5xxl = "/mnt/ssd_1T/code/ComfyUI/models/text_encoders/t5/t5xxl_fp16.safetensors"
+ae = "/mnt/ssd_1T/code/ComfyUI/models/vae/ae.safetensors"
+
+[train]
+learning_rate = 1e-3                                            # LoRA: le-4 ~ 1e-3         Dreambooth: 1e-6 
+max_train_epochs = 600
+# max_train_steps = 600
+max_data_loader_n_workers = 12
+persistent_data_loader_workers = false                          # more fast, but maybe use more gpu memory, but just improve in windows
+gradient_accumulation_steps = 1
+
+noise_offset = 0.1                                              # improve global light or dark image
+weighting_scheme = "logit_normal"                               # ["sigma_sqrt", "logit_normal", "mode", "cosmap", "none", "uniform"]
+logit_mean = 0.0
+logit_std = 1.0
+mode_scale = 1.29
+timestep_sampling = "shift"
+discrete_flow_shift = 3.1582
+model_prediction_type = "raw"
+guidance_scale = 1.0
+
+apply_t5_attn_mask = false                                       # focus the dataset token, not padding token
+
+mixed_precision = "bf16"
+full_fp16 = false                                               # higher risk of gradient overflow
+full_bf16 = false                                               # more stable, but need RTX 40
+fp8_base = true
+
+[conditioning-data]
+# conditioning_data_dir = ""
+masked_loss = false                                             # if have external mask data(inpainting, controlnet), set 'true'
+
+[other]
+seed = 42
+# clip_skip = 2
+# cache_text_encoder_outputs = true
+# cache_text_encoder_outputs_to_disk = true

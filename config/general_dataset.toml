@@ -1,0 +1,44 @@
+[general]
+shuffle_caption = true
+caption_extension = ".txt"
+# keep_tokens_separator = "|||"
+# secondary_separator = ";;;"
+
+caption_dropout_rate = 0.0
+color_aug = false
+flip_aug = false
+# face_crop_aug_range = [1.0, 3.0]
+
+enable_bucket = true
+bucket_no_upscale = false                               # Avoid small image to scale too big / save vram / there are too much small image in dataset
+min_bucket_reso = 256
+max_bucket_reso = 1024
+# max_bucket_reso = 512
+
+cache_info = false                                      # Specifies whether to cache the image size and caption. If not specified, it is set to false. The cache is saved in metadata_cache.json in image_dir.
+
+# This is a DreamBooth-style dataset
+[[datasets]]
+batch_size = 16
+
+# caption_prefix = "masterpiece, best quality"          # If add some word in all caption, raise the attention for this word.
+# caption_suffix = ", anime style"                      # enhance to train this style.
+
+    [[datasets.subsets]]
+    image_dir = "/mnt/ssd_1T/data/SDData/toy_data/train_data"
+    class_tokens = "PNBPT"
+    # caption_prefix = ""
+    num_repeats = 1
+    is_reg = false
+    # metadata_file = ""
+
+
+# This is a fine-tuning dataset
+# [[datasets]]
+
+
+# C:\
+# ├─ hoge  ->  [[datasets.subsets]] No.1  ┐                        ┐
+# ├─ fuga  ->  [[datasets.subsets]] No.2  |->  [[datasets]] No.1   |->  [general]
+# ├─ reg   ->  [[datasets.subsets]] No.3  ┘                        |
+# └─ piyo  ->  [[datasets.subsets]] No.4  -->  [[datasets]] No.2   ┘
